@@ -28,11 +28,14 @@ namespace Client
 
             Console.WriteLine("Sunucuya bağlantı kuruldu.");
             Console.WriteLine("Kullanıcı adınızı giriniz:");
-            string username = Console.ReadLine();
-            username = username.Trim();
+         
+           string? response = await Register();
 
-            await _writer.WriteLineAsync(username);
-                       
+            if(response == null)
+            {
+                return;
+            }
+
 
             Task receiveTask = ReceiveMessages();
             Task sendTask = SendMessages();
@@ -71,6 +74,45 @@ namespace Client
                 }
 
                 Console.WriteLine(message);
+            }
+        }
+
+        private async Task<string?> Register()
+        {
+            while (true)
+            {
+
+            Console.WriteLine("Lütfen kullanıcı adınızı giriniz");
+            string? username = Console.ReadLine();
+            if(username == null)
+            {
+                Console.WriteLine("Kullanıcı adı boş olamaz");
+                return null;
+            }
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                continue;
+            }
+            username = username.Trim();
+
+            await _writer.WriteLineAsync(username);
+
+            string? response = await _reader.ReadLineAsync();
+            if(response == null)
+            {
+                return null;
+            }
+
+            if(response == "Kullanıcı kaydı başarılı")
+            {
+                return username;
+            }
+                else
+                {
+                    Console.WriteLine(response);
+                    continue;
+                }
+            
             }
         }
     }
